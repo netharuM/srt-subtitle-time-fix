@@ -1,3 +1,6 @@
+# SRT time fixer github:@netharuM/srt-subtitle-time-fix
+# /srt.py --> SRT file datatype handlers
+
 class srt_time:
     def __init__(self):
         self.hours = 0
@@ -64,3 +67,24 @@ class srt_sequence:
         sub_sequence = "{}\n{}  -->  {}\n{}".format(
             sequence_number_str, beginning_time_str, ending_time_str, sub_lines)
         return sub_sequence
+
+
+class srt_data:
+    def __init__(self):
+        self.sequences = None
+
+    def parse_from_str(self, srt_file_content: str):
+        sequence_arr = srt_file_content.split('\n\n')
+        sequence_arr = [x for x in sequence_arr if x != '']
+
+        def sequence_str_to_map(str):
+            sequence = srt_sequence()
+            sequence.from_str(str)
+            return sequence
+
+        self.sequences = list(map(sequence_str_to_map, sequence_arr))
+
+    def to_str_file(self) -> str:
+        sequences_str = list(
+            map(lambda sequence: sequence.to_str(), self.sequences))
+        return "\n\n".join(sequences_str)
