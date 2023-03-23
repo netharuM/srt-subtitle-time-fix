@@ -3,10 +3,36 @@
 
 class srt_time:
     def __init__(self):
+        self.MAX_MILLISECONDS = 1000
+        self.MAX_MINUTES_AND_SECONDS = 60
+
         self.hours = 0
         self.milliseconds = 0
         self.minutes = 0
         self.seconds = 0
+
+    def fix_time_errs(self, time):
+        # fixes time issues like 00:00:00,1500 to 00:00:01,500
+
+        if (time.milliseconds > self.MAX_MILLISECONDS):
+            actualTime = time.milliseconds % self.MAX_MILLISECONDS
+            time.seconds += int((time.milliseconds - actualTime) /
+                                self.MAX_MILLISECONDS)
+            time.milliseconds = actualTime
+
+        if (time.seconds > self.MAX_MINUTES_AND_SECONDS):
+            actualTime = time.seconds % self.MAX_MINUTES_AND_SECONDS
+            time.minutes += int((time.seconds - actualTime) /
+                                self.MAX_MINUTES_AND_SECONDS)
+            time.seconds = actualTime
+
+        if (time.minutes > self.MAX_MINUTES_AND_SECONDS):
+            actualTime = time.minutes % self.MAX_MINUTES_AND_SECONDS
+            time.hours += int((time.minutes - actualTime) /
+                              self.MAX_MINUTES_AND_SECONDS)
+            time.minutes = actualTime
+
+        return time
 
     def __add__(self, y):
         new_time = srt_time()
@@ -14,7 +40,7 @@ class srt_time:
         new_time.hours = self.hours + y.hours
         new_time.seconds = self.seconds + y.seconds
         new_time.milliseconds = self.milliseconds + y.milliseconds
-        return new_time
+        return self.fix_time_errs(new_time)
 
     def __sub__(self, y):
         new_time = srt_time()
@@ -22,7 +48,7 @@ class srt_time:
         new_time.hours = self.hours - y.hours
         new_time.seconds = self.seconds - y.seconds
         new_time.milliseconds = self.milliseconds - y.milliseconds
-        return new_time
+        return self.fix_time_errs(new_time)
 
     def from_str(self, sequence_time_str):
         t_split = sequence_time_str.split(',')
