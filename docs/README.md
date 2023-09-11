@@ -4,7 +4,7 @@ hard code the time with srt-stf
 
 ## Install
 - Simply clone the repository
-- Install python3
+- Install `python3`
 - Installing with the Script (tested only in Linux)
     - then run the following
         ```sh
@@ -21,7 +21,7 @@ hard code the time with srt-stf
         #                                   ^
         # [A path which is in the executables]
         ```
-- Running using `python` on `Windows/Mac/Linux`
+- Running (without installing) using `python` on `Windows/Mac/Linux`
     - first move into the directory you have downloaded the code to
         ```
         cd srt-subtitle-time-fix
