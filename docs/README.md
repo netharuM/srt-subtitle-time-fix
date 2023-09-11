@@ -3,14 +3,33 @@ is your subtitle timing incorrect.
 hard code the time with srt-stf
 
 ## Install
-- simply clone the repository
-- install python3
-- then run the following (for linux)
-    ```
-    sudo ./install.sh
-    ```
-- to uninstall run ```sudo ./uninstall.sh```
-
+- Simply clone the repository
+- Install python3
+- Installing with the Script (tested only in Linux)
+    - then run the following
+        ```sh
+        sudo ./install.sh
+        ```
+    - to uninstall run 
+        ```sh
+        sudo ./uninstall.sh
+        ```
+- Or just simply symlink the `__main__.py` file to a path which is in your executable path
+    - In linux
+        ```bash
+        ln -s "$(pwd)/__main__.py" /bin/srt-stf
+        #                                   ^
+        # [A path which is in the executables]
+        ```
+- Running using `python` on `Windows/Mac/Linux`
+    - first move into the directory you have downloaded the code to
+        ```
+        cd srt-subtitle-time-fix
+        ```
+    - Then run the following
+        ```
+        python . [-h] [--negative] [--encoding ENCODING] --file FILE --out OUT --time TIME
+        ```
 ## Usage
 -   ```
     usage: srt-stf [-h] [--negative] [--encoding ENCODING] --file FILE --out OUT --time TIME
