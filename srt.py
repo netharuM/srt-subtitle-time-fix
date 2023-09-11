@@ -2,67 +2,60 @@
 # /srt.py --> SRT file datatype handlers
 
 class srt_time:
-    def __init__(self):
-        self.MAX_MILLISECONDS = 1000
-        self.MAX_MINUTES_AND_SECONDS = 60
+    MILLISECONDS_PER_HOUR = 3600000
+    MILLISECONDS_PER_MINUTE = 60000
+    MILLISECONDS_PER_SECOND = 1000
 
-        self.hours = 0
-        self.milliseconds = 0
-        self.minutes = 0
-        self.seconds = 0
-
-    def fix_time_errs(self, time):
-        # fixes time issues like 00:00:00,1500 to 00:00:01,500
-
-        if (time.milliseconds > self.MAX_MILLISECONDS):
-            actualTime = time.milliseconds % self.MAX_MILLISECONDS
-            time.seconds += int((time.milliseconds - actualTime) /
-                                self.MAX_MILLISECONDS)
-            time.milliseconds = actualTime
-
-        if (time.seconds > self.MAX_MINUTES_AND_SECONDS):
-            actualTime = time.seconds % self.MAX_MINUTES_AND_SECONDS
-            time.minutes += int((time.seconds - actualTime) /
-                                self.MAX_MINUTES_AND_SECONDS)
-            time.seconds = actualTime
-
-        if (time.minutes > self.MAX_MINUTES_AND_SECONDS):
-            actualTime = time.minutes % self.MAX_MINUTES_AND_SECONDS
-            time.hours += int((time.minutes - actualTime) /
-                              self.MAX_MINUTES_AND_SECONDS)
-            time.minutes = actualTime
-
-        return time
+    def __init__(self) -> None:
+        self.inMilliseconds = 0
 
     def __add__(self, y):
         new_time = srt_time()
-        new_time.minutes = self.minutes + y.minutes
-        new_time.hours = self.hours + y.hours
-        new_time.seconds = self.seconds + y.seconds
-        new_time.milliseconds = self.milliseconds + y.milliseconds
-        return self.fix_time_errs(new_time)
+        new_time.inMilliseconds = self.inMilliseconds + y.inMilliseconds
+        return new_time
 
     def __sub__(self, y):
         new_time = srt_time()
-        new_time.minutes = self.minutes - y.minutes
-        new_time.hours = self.hours - y.hours
-        new_time.seconds = self.seconds - y.seconds
-        new_time.milliseconds = self.milliseconds - y.milliseconds
-        return self.fix_time_errs(new_time)
+        new_time.inMilliseconds = self.inMilliseconds - y.inMilliseconds
+        return new_time
 
     def from_str(self, sequence_time_str):
         t_split = sequence_time_str.split(',')
         time_arr = t_split[0].split(':')
-        self.milliseconds = int(t_split[1])
-        self.hours = int(time_arr[0])
-        self.minutes = int(time_arr[1])
-        self.seconds = int(time_arr[2])
+        hours = int(time_arr[0])
+        minutes = int(time_arr[1])
+        seconds = int(time_arr[2])
+        milliseconds = int(t_split[1])
+        self.setFromDiffFormats(hours, minutes, seconds, milliseconds)
+
+    def setFromDiffFormats(self, hours: int, minutes: int, seconds: int, milliseconds: int) -> int:
+        inMillis = milliseconds
+        inMillis += seconds * self.MILLISECONDS_PER_SECOND
+        inMillis += minutes * self.MILLISECONDS_PER_MINUTE
+        inMillis += hours * self.MILLISECONDS_PER_HOUR
+        self.inMilliseconds = inMillis
+        return inMillis
+
+    def getHrsMinsSecsMils(self):
+        inMillis = self.inMilliseconds
+        milliseconds = inMillis % self.MILLISECONDS_PER_SECOND
+        inMillis -= milliseconds
+        seconds = (inMillis % self.MILLISECONDS_PER_MINUTE) / \
+            self.MILLISECONDS_PER_SECOND
+        inMillis -= seconds * self.MILLISECONDS_PER_SECOND
+        minutes = (inMillis % self.MILLISECONDS_PER_HOUR) / \
+            self.MILLISECONDS_PER_MINUTE
+        inMillis -= minutes * self.MILLISECONDS_PER_MINUTE
+        hours = inMillis / self.MILLISECONDS_PER_HOUR
+        # wrapped in ints because the dividing always results in a float in python
+        return (int(hours), int(minutes), int(seconds), milliseconds)
 
     def to_str(self):
-        hours_str = str(self.hours).zfill(2)
-        minutes_str = str(self.minutes).zfill(2)
-        seconds_str = str(self.seconds).zfill(2)
-        milliseconds_str = str(self.milliseconds).zfill(3)
+        (hours, minutes, seconds, milliseconds) = self.getHrsMinsSecsMils()
+        hours_str = str(hours).zfill(2)
+        minutes_str = str(minutes).zfill(2)
+        seconds_str = str(seconds).zfill(2)
+        milliseconds_str = str(milliseconds).zfill(3)
         time_str = "{}:{}:{},{}".format(
             hours_str, minutes_str, seconds_str, milliseconds_str)
         return time_str
